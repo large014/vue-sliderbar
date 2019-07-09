@@ -4,7 +4,7 @@
       <div ref="handle1_wrap" class="handle1_wrap" @mousedown="touchstart" @mouseup="touchend" :style="{left:x1 + 'px'}">
         <slot name="handle1"></slot>
       </div>
-      <div ref="handle2_wrap"  class="handle2_wrap" @mousedown="touchstart" @mousemove="touchmove" @mouseup="touchend" >
+      <div ref="handle2_wrap" class="handle2_wrap" @mousedown="touchstart" @mouseup="touchend" :style="{left:x2 + 'px'}">
         <slot name="handle2"></slot>
       </div>
       <div class="gageArea">
@@ -79,7 +79,7 @@ export default {
           this.moveX = Math.round(e.clientX - this.handle1_pos.x);
           // console.log('moveX = ' + this.moveX);
           // console.log('w = ' + this.$handle1_wrap.clientWidth);
-          this.value = this.moveX * ( 100 / 290);
+          this.value = Math.round( this.moveX * ( 100 / 290) );
           this.setPosition();
           console.log('value = ' + this.value);
           // console.log('this.x1 = ' + this.x1);
