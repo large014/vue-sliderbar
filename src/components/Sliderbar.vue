@@ -4,7 +4,7 @@
       <div ref="handle1_wrap" class="handle1_wrap" @mousedown="touchstart" @mouseup="touchend" :style="{left:x1 + 'px'}">
         <slot name="handle1"></slot>
       </div>
-      <div ref="handle2_wrap"  class="handle2_wrap" @mousedown="touchstart" @mouseup="touchend" :style="{left:x2 + 'px'}">
+      <div ref="handle2_wrap"  class="handle2_wrap" @mousedown="touchstart" @mousemove="touchmove" @mouseup="touchend" >
         <slot name="handle2"></slot>
       </div>
       <div class="gageArea">
@@ -100,7 +100,7 @@ export default {
       } else if( this.moveX > (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ){
         console.log('case2');
         this.x1 = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
-        this.value = 100;
+        this.value = 290;
       } else {
         this.x1 = this.moveX;
       }
