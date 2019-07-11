@@ -1,11 +1,9 @@
 <template>
   <div id="app">
-    <Sliderbar class="sliderbar">
+    <Sliderbar class="sliderbar" type="range" :rate="100">
       <div slot="handle1" class="handle handle1">
-        <!-- <p class="handle"></p> -->
       </div>
       <div slot="handle2" class="handle handle2">
-        <!-- <p class="handle"></p> -->
       </div>
     </Sliderbar>
   </div>
@@ -33,19 +31,15 @@ export default {
 }
 
 .handle{
-  // position: absolute;
-  // top: 0;
-
-  background: #3f51b5;
   border: none;
   border-radius: 3px;
-  // cursor: pointer;
   height: 20px;
   width: 10px;
-  // margin-top: -14px;
 }
-
+.handle1{
+  background: #3f51b5;
+}
 .handle2{
-    background: #ff51b5;
+  background: #ff51b5;
 }
 </style>
