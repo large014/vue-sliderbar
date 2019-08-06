@@ -1,11 +1,13 @@
 <template>
   <div id="app">
-    <Sliderbar class="sliderbar" type="range" :rate="100">
-      <div slot="handle1" class="handle handle1">
-      </div>
-      <div slot="handle2" class="handle handle2">
-      </div>
-    </Sliderbar>
+    <div class="sliderbarArea">
+      <Sliderbar class="sliderbar" type="normal" :rate="100" :settings="settings">
+        <div slot="handle1" class="handle handle1">
+        </div>
+        <div slot="handle2" class="handle handle2">
+        </div>
+      </Sliderbar>
+    </div>
   </div>
 </template>
 
@@ -16,6 +18,21 @@ export default {
   name: 'app',
   components: {
     Sliderbar
+  },
+  data(){
+    return{
+      settings:{
+        activebar_C : "#07cdAA",
+        deactivebar_C : "#CCC",
+        gageArea_C : "#CCC",
+        bar_H : "1px",
+        min_value : -50,
+        max_value : 400,
+        scale_C : "#F00",
+        scale_Top : "40px",
+        scale_Step : 3
+      }
+    }
   }
 }
 </script>
@@ -24,12 +41,14 @@ export default {
 #app{
   text-align: center;
 }
+.sliderbarArea{
+  margin-top: 100px;
+}
+
 .sliderbar{
   width:300px;
   margin: 0 auto;
-  padding-top: 100px;
 }
-
 .handle{
   border: none;
   border-radius: 3px;
