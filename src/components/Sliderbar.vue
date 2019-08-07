@@ -1,10 +1,7 @@
 <template>
   <div class="sliderbar_wrap">
     <div ref="sliderbar_inner" class="sliderbar_inner">
-      <!-- <div ref="activebar" class="activebar" :style="{width:barW +'px'}"></div> -->
       <div ref="activebar" class="activebar" :style="activebar_styles"></div>
-      <!-- <div ref="range_min_bar" class="range_min_bar range_deactivebar" :style="{width:min_barW +'px'}"></div> -->
-      <!-- <div ref="range_max_bar" class="range_max_bar range_deactivebar" :style="{left:max_barW +'px'}"></div> -->
       <div ref="range_min_bar" class="range_min_bar range_deactivebar" :style="bar1_styles"></div>
       <div ref="range_max_bar" class="range_max_bar range_deactivebar" :style="bar2_styles"></div>
       <div ref="handle1_wrap" class="handle1_wrap" @mousedown="touchstart" @mouseup="touchend" :style="{left:x1 + 'px'}" data_id="handle1_wrap">
@@ -17,7 +14,7 @@
         <div class="gage"></div>
       </div>
     </div>
-    <SliderScale :color="this.settings.scale_C" :top="this.settings.scale_Top" :step="this.settings.scale_Step"/>
+    <SliderScale :color="this.settings.scale_C" :wrap_top="this.settings.scale_BaseTop" :scale_top="this.settings.scale_Top" :step="this.settings.scale_Step"/>
   </div>
 </template>
 
@@ -60,7 +57,8 @@ export default {
       handleW : 0,
       barW : 0,
       min_barW : 0,
-      max_barW : 0
+      max_barW : 0,
+      step_list : []
     }
   },
   computed:{
@@ -99,13 +97,6 @@ export default {
         '--bar_h' : this.settings.bar_H
       }
     },
-    // _x1(){
-    //   console.log('xx = ' + '${this.x1}px');
-    //   return '${this.x1}px';
-    // },
-    // _x2(){
-    //   return '${this.x2}px';
-    // },
   },
 
   mounted(){
@@ -135,8 +126,6 @@ export default {
     console.log(this.settings);
     console.log(this.settings.activebar_C);
     console.log(' h = ' + this.settings.bar_H);
-
-
   },
 
   methods:{
@@ -159,10 +148,8 @@ export default {
         if(this.handleType == 0){
           this.handle1_pos.movedX = e.offsetX - this.handle1_pos.x;
           this.handle1_pos.movedY = e.offsetY - this.handle1_pos.y;
-          // this.moveX1 = Math.round(e.clientX - this.handle1_pos.x);
           this.moveX1 = this.setMoveValue(this.moveX1, e, this.handle1_pos.x);
           console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2 + "▲ value1 = " + this.value1);
-          // this.rateValue1 = Math.round( this.moveX1 * ( 100 / this.limitX) );
           this.handle1_setPosition();
 
           console.log('▲ rateValue1 = ' + this.rateValue1);
@@ -170,23 +157,18 @@ export default {
         } else {
           this.handle2_pos.movedX = e.offsetX - this.handle2_pos.x;
           this.handle2_pos.movedY = e.offsetY - this.handle2_pos.y;
-          // this.moveX2 = Math.round(e.clientX - this.handle2_pos.x);
           this.moveX2 = this.setMoveValue(this.moveX2, e, this.handle2_pos.x);
           console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2);
-          // this.rateValue2 = Math.round( this.moveX2 * ( 100 / this.limitX) );
           this.handle2_setPosition();
 
           console.log('△ rateValue2 = ' + this.rateValue2);
-          // console.log('△ moveX2 = ' + this.moveX2 + ", ▲ moveX1 = " + this.moveX1);
         }
         if(this.type !="range"){
           this.barW = this.moveX1;
         }
       }
-      // console.log("m");
     },
     touchend(){
-      console.log("e");
       this.isMouseDown = false;
       console.log('END | moveX1 = ' + this.moveX1 + ", moveX2 = " + this.moveX2 );
     },
@@ -207,17 +189,18 @@ export default {
       } else if( this.moveX1 > (this.moveX2 - this.handleW) ){
         this.moveX1 = this.moveX2 - this.handleW;
         this.x1 = this.moveX2 - this.handleW;
-        // console.log('1. case2 | moveX1 = ' + this.moveX1 + ", moveX2 = " + this.moveX2 );
       } else if( this.moveX1 > (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ){
         this.x1 = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
-        // this.rateValue1 = this.maxvalue;
-        // console.log('1. case3');
       } else {
         this.x1 = this.moveX1;
-        // console.log('1. case4')
       }
       this.value1 = Math.floor(this.moveX1 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ) ) + this.settings.min_value );
       this.rateValue1 = Math.round( this.moveX1 * ( this.rate / this.limitX) );
+
+      if(this.settings.step != 0){
+        console.log('stepあり');
+      }
+
       if(this.type=="range"){
         this.min_barW = this.moveX1;
       }
@@ -229,14 +212,10 @@ export default {
       } else if( this.moveX2 < (this.moveX1 + this.handleW) ){
         this.moveX2 = this.moveX1 + this.handleW;
         this.x2 = this.moveX1 + this.handleW;
-        // console.log('2. case2 | moveX1 = ' + this.moveX1 + ", moveX2 = " + this.moveX2);
       } else if( this.moveX2 > (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth) ){
         this.x2 = this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth;
-        // this.rateValue2 = this.maxvalue;
-        // console.log('2. case3');
       } else {
         this.x2 = this.moveX2;
-        // console.log('2. case4 = ' + this.moveX2);
       }
       this.rateValue2 = Math.round( this.moveX2 * ( this.rate / this.limitX) );
       if(this.type=="range"){
