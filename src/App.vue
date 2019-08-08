@@ -26,12 +26,12 @@ export default {
         deactivebar_C : "#CCC",
         gageArea_C : "#CCC",
         bar_H : "1px",
-        min_value : -50,
+        min_value : 50,
         max_value : 400,
         scale_C : "#F00",
         scale_BaseTop : "-10px",
         scale_Top : "-10px",
-        scale_Step : 7
+        scale_Step : 2
       }
     }
   }

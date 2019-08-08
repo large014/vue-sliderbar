@@ -58,7 +58,9 @@ export default {
       barW : 0,
       min_barW : 0,
       max_barW : 0,
-      step_list : []
+      stepValue_list : [],
+      stepPos_list : [],
+      current_step : 0
     }
   },
   computed:{
@@ -106,7 +108,6 @@ export default {
     console.log('長さ = ' + this.$sliderbar_inner.clientWidth);
     console.log('ハンドル = ' + this.$handle1_wrap.clientWidth);
 
-
     //--- イベント設定
     window.addEventListener("mousemove", this.touchmove.bind(this));
     window.addEventListener("mouseup", this.touchend.bind(this));
@@ -123,9 +124,21 @@ export default {
     this.x2 = (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth);
     this.moveX2 = this.x2;
     this.max_barW = this.moveX2;
-    console.log(this.settings);
-    console.log(this.settings.activebar_C);
-    console.log(' h = ' + this.settings.bar_H);
+    // console.log(this.settings);
+    // console.log(this.settings.activebar_C);
+    console.log(' h = ' + ( -(this.settings.min_value) + this.settings.max_value ));
+
+    //--- stepありの場合の設定
+    for (let index = 1; index < (this.settings.scale_Step + 2); index++) {
+      this.stepValue_list.push( (  ( ( -(this.settings.min_value) + this.settings.max_value ) / (this.settings.scale_Step + 1) ) * index ) + this.settings.min_value );
+    }
+
+    for (let index = 0; index < (this.settings.scale_Step + 2); index++) {
+      this.stepPos_list.push( ( this.$sliderbar_inner.clientWidth / (this.settings.scale_Step + 1) ) * index );
+    }
+
+    console.log(this.stepValue_list);
+    console.log(this.stepPos_list);
   },
 
   methods:{
@@ -197,8 +210,22 @@ export default {
       this.value1 = Math.floor(this.moveX1 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ) ) + this.settings.min_value );
       this.rateValue1 = Math.round( this.moveX1 * ( this.rate / this.limitX) );
 
-      if(this.settings.step != 0){
+      //---- step時の処理
+      if(this.settings.scale_Step != 0){
         console.log('stepあり');
+        for (let index = 0; index < this.stepPos_list.length; index++) {
+          if( this.moveX1 < this.stepPos_list[index] ){
+            if( this.moveX1 < ( this.stepPos_list[index - 1] + this.stepPos_list[index] ) / 2 ){
+              this.x1 = this.stepPos_list[index - 1];
+            } else {
+              this.x1 = this.stepPos_list[index];
+              if( this.x1 > (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ){
+                this.x1 = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
+              }
+            }
+            break;
+          }
+        }
       }
 
       if(this.type=="range"){
@@ -222,6 +249,15 @@ export default {
         this.max_barW = this.moveX2;
       }
     },
+    set_stepPosition( tgtStepVal ){
+        if( this.value1 < ( tgtStepVal / 2 ) ){
+          if( this.current_step > 0 ) {
+            this.current_step -=1;
+          }
+        } else {
+          this.current_step += 1;
+        }
+    }
   }
 }
 </script>
