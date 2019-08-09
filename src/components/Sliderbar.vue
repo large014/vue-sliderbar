@@ -3,7 +3,7 @@
     <div ref="sliderbar_inner" class="sliderbar_inner">
       <div ref="activebar" class="activebar" :style="activebar_styles"></div>
       <div ref="range_min_bar" class="range_min_bar range_deactivebar" :style="bar1_styles"></div>
-      <div ref="range_max_bar" class="range_max_bar range_deactivebar" :style="bar2_styles"></div>
+      <div ref="range_max_bar" class="range_max_bar range_deactivebar" :class="{off : settings.type!= 'range' }" :style="bar2_styles"></div>
       <div ref="handle1_wrap" class="handle1_wrap" @mousedown="touchstart" @mouseup="touchend" :style="{left:x1 + 'px'}" data_id="handle1_wrap">
         <slot name="handle1"></slot>
       </div>
@@ -29,11 +29,11 @@ export default {
   },
   props: {
     msg: String,
-    type : String,
-    rate : {
-                type:Number,
-                default: 100
-            },
+    // type : String,
+    // rate : {
+    //             type:Number,
+    //             default: 100
+    //         },
     settings: {
         type : Object,
         default:null
@@ -74,7 +74,7 @@ export default {
       return this.$refs.sliderbar_inner;
     },
     getHandleType(){
-      let range = (this.type == "range") ? true : false;
+      let range = (this.settings.type == "range") ? true : false;
       console.log('range = ' + range);
       return range
     },
@@ -115,7 +115,7 @@ export default {
     //--- 初期値の設定
     this.limitX = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
     this.handleW = this.$handle1_wrap.clientWidth;
-    if(this.type != "range"){
+    if(this.settings.type != "range"){
       this.handleW = 0 //--- handleの幅
     } else {
       this.barW = this.$sliderbar_inner.clientWidth; //--- アクティブバーの長さの設定
@@ -171,14 +171,15 @@ export default {
           this.handle2_pos.movedX = e.offsetX - this.handle2_pos.x;
           this.handle2_pos.movedY = e.offsetY - this.handle2_pos.y;
           this.moveX2 = this.setMoveValue(this.moveX2, e, this.handle2_pos.x);
-          console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2);
+          console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2 + "▲ value2 = " + this.value2);
           this.handle2_setPosition();
 
           console.log('△ rateValue2 = ' + this.rateValue2);
         }
-        if(this.type !="range"){
-          this.barW = this.moveX1;
-        }
+        this.setActiveBar();
+        // if(this.settings.type !="range"){
+        //   this.barW = this.moveX1;
+        // }
       }
     },
     touchend(){
@@ -208,7 +209,7 @@ export default {
         this.x1 = this.moveX1;
       }
       this.value1 = Math.floor(this.moveX1 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ) ) + this.settings.min_value );
-      this.rateValue1 = Math.round( this.moveX1 * ( this.rate / this.limitX) );
+      this.rateValue1 = Math.round( this.moveX1 * ( this.settings.rate / this.limitX) );
 
       //---- step時の処理
       if(this.settings.scale_Step != 0){
@@ -228,7 +229,7 @@ export default {
         }
       }
 
-      if(this.type=="range"){
+      if(this.settings.type=="range"){
         this.min_barW = this.moveX1;
       }
     },
@@ -244,20 +245,61 @@ export default {
       } else {
         this.x2 = this.moveX2;
       }
-      this.rateValue2 = Math.round( this.moveX2 * ( this.rate / this.limitX) );
-      if(this.type=="range"){
+
+      this.value2 = Math.floor(this.moveX2 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth) ) ) + this.settings.min_value );
+      this.rateValue2 = Math.round( this.moveX2 * ( this.settings.rate / this.limitX) );
+
+      // //---- step時の処理
+      // this.setStepHandlePos(this.moveX2, this.$handle2_wrap, this.x2 );
+      if(this.settings.scale_Step != 0){
+        console.log('stepあり');
+        for (let index = 0; index < this.stepPos_list.length; index++) {
+          if( this.moveX2 < this.stepPos_list[index] ){
+            if( this.moveX2 < ( this.stepPos_list[index - 1] + this.stepPos_list[index] ) / 2 ){
+              this.x2 = this.stepPos_list[index - 1];
+            } else {
+              this.x2 = this.stepPos_list[index];
+              if( this.x2 > (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth) ){
+                this.x2 = this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth;
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      if(this.settings.type=="range"){
         this.max_barW = this.moveX2;
       }
     },
-    set_stepPosition( tgtStepVal ){
-        if( this.value1 < ( tgtStepVal / 2 ) ){
-          if( this.current_step > 0 ) {
-            this.current_step -=1;
-          }
-        } else {
-          this.current_step += 1;
+    setActiveBar(){
+        if(this.settings.type !="range"){
+          // this.barW = this.moveX1;
+          this.barW = this.x1;
         }
+    },
+    setStepHandlePos(_moveVal, _handle, _tgtX){
+      //---- step時の処理
+      if(this.settings.scale_Step != 0){
+        console.log('stepあり = ' + _moveVal + "_tgtX = " + _tgtX);
+        for (let index = 0; index < this.stepPos_list.length; index++) {
+          if( _moveVal < this.stepPos_list[index] ){
+            if( _moveVal < ( this.stepPos_list[index - 1] + this.stepPos_list[index] ) / 2 ){
+              console.log('hit1');
+              _tgtX = this.stepPos_list[index - 1];
+            } else {
+              console.log('hit2');
+              _tgtX = this.stepPos_list[index];
+              if( _tgtX > (this.$sliderbar_inner.clientWidth - _handle.clientWidth) ){
+                _tgtX = this.$sliderbar_inner.clientWidth - _handle.clientWidth;
+              }
+            }
+            break;
+          }
+        }
+      }
     }
+
   }
 }
 </script>
@@ -306,10 +348,14 @@ export default {
 .range_min_bar{
   // right: 0;
   // background-color: var(--deactivebar_c);
+
 }
 
 .range_max_bar{
   right: 0;
+  &.off{
+    display: none;
+  }
   // background-color: var(--deactivebar_c);
 }
 

@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <div class="sliderbarArea">
-      <Sliderbar class="sliderbar" type="normal" :rate="100" :settings="settings">
+      <!-- <Sliderbar class="sliderbar" type="range" :rate="100" :settings="settings"> -->
+      <Sliderbar class="sliderbar" :settings="settings">
         <div slot="handle1" class="handle handle1">
         </div>
         <div slot="handle2" class="handle handle2">
@@ -22,12 +23,14 @@ export default {
   data(){
     return{
       settings:{
+        type : 'range',
         activebar_C : "#07cdAA",
         deactivebar_C : "#CCC",
         gageArea_C : "#CCC",
-        bar_H : "1px",
+        bar_H : "12px",
         min_value : 50,
         max_value : 400,
+        rate: 100,
         scale_C : "#F00",
         scale_BaseTop : "-10px",
         scale_Top : "-10px",
