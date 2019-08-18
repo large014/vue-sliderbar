@@ -58,7 +58,9 @@ export default {
       stepPos_list : [],
       handle1_z : 1,
       handle2_z : 1,
-      step : 0
+      step : 0,
+      t1 : 0,
+      t2 : 0
     }
   },
   computed:{
@@ -119,12 +121,18 @@ export default {
     // console.log('長さ = ' + this.$sliderbar_inner.clientWidth);
     // console.log('ハンドル = ' + this.$handle1_wrap.clientWidth);
 
+    //--- setteingのエラーチェック
+
+
     //--- イベント設定
     window.addEventListener("mousemove", this.touchmove.bind(this));
     window.addEventListener("mouseup", this.touchend.bind(this));
 
     //--- 初期値の設定
+
+
     this.limitX = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
+
     this.handleW = this.$handle1_wrap.clientWidth;
     if(this.settings.type != "range"){
       this.handleW = 0 //--- handleの幅
@@ -137,8 +145,8 @@ export default {
     this.max_barW = this.moveX2;
 
 
-    //--- scale_Stepとscale_Dataの整合性
-    if( this.settings.scale_Data === void 0 ){
+    //--- scale_Stepとtick_ValueListの整合性
+    if( this.settings.tick_ValueList === void 0 ){
       console.log('ないよー');
       this.step = this.settings.scale_Step;
       //--- scale_Stepありの場合のValueの設定
@@ -147,17 +155,41 @@ export default {
       }
     } else {
       console.log('あるよー');
-      //--- scale_Dataありの場合のValue設定
-      this.stepValue_list = this.settings.scale_Data;
-      this.step = this.settings.scale_Data.length - 2;
+      //--- tick_ValueListありの場合のValue設定
+      this.stepValue_list = this.settings.tick_ValueList;
+      this.step = this.settings.tick_ValueList.length - 2;
     }
 
     //--- stepありの場合の目盛り判定ポジションの設定
     for (let index = 0; index < (this.step + 2); index++) {
-      if( index != 0 && index != (this.step + 1) ) {
-        this.stepPos_list.push( ( ( this.$sliderbar_inner.clientWidth / (this.step + 1) ) * index ) - (this.$handle1_wrap.clientWidth / 2) );
-      } else {
-        this.stepPos_list.push( ( this.$sliderbar_inner.clientWidth / (this.step + 1) ) * index );
+      // if( index != 0 && index != (this.step + 1) ) {
+        // this.stepPos_list.push( ( ( (this.$sliderbar_inner.clientWidth - 10 ) / (this.step + 1) ) * index ) );
+      // } else {
+        this.stepPos_list.push( ( (this.$sliderbar_inner.clientWidth - 10 ) / (this.step + 1) ) * index );
+      // }
+    }
+
+    if( this.settings.init_value1 != void 0){
+      // this.moveX1 = this.settings.init_value1;
+      this.setInitValue(1, this.settings.init_value1 );
+      this.setInitStepValue( 1, this.settings.init_value1 );
+      this.handle1_setPosition();
+    }
+
+    if( this.settings.init_value2 != void 0){
+      // this.moveX1 = this.settings.init_value1;
+      this.setInitValue(2, this.settings.init_value2 );
+      this.setInitStepValue( 2, this.settings.init_value2 );
+      this.handle2_setPosition();
+    }
+
+
+
+    if( this.settings.type === "range" ){
+      if( this.settings.init_value2 != void 0 ){
+          this.handleType = 1;
+          this.setInitStepValue( 2, this.settings.init_value2 );
+          this.handle2_setPosition();
       }
     }
 
@@ -165,7 +197,8 @@ export default {
 
     console.log(this.stepValue_list);
     console.log(this.stepPos_list);
-
+    console.log('move2 = ' + this.moveX2);
+    
   },
 
   methods:{
@@ -189,66 +222,77 @@ export default {
           //---- ハンドルのz-index設定
           this.handle1_z = 2;
           this.handle2_z = 1;
-          this.moveX1 = this.setMoveValue(this.moveX1, e, this.handle1_pos.x);
-          console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2 + "▲ value1 = " + this.value1);
-          this.handle1_setPosition();
+          // this.moveX1 = this.setMoveValue(this.moveX1, e, this.handle1_pos.x);
+          // console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2 + "▲ value1 = " + this.value1);
+          // this.handle1_setPosition();
+          this.handle1_setPosition(e, this.handle1_pos.x);
 
-          console.log('▲ rateValue1 = ' + this.rateValue1 + ', ▲ stepValue1 = ' + this.stepValue1);
+          console.log('▲ rateValue1 = ' + this.rateValue1 + ', ▲ stepValue1 = ' + this.stepValue1 + ', ▲ value1 = ' + this.value1 + ', ▲ moveX1 = ' + this.moveX1 + ",△ moveX2 = " + this.moveX2 );
         } else {
           //---- ハンドルのz-index設定
           this.handle1_z = 1;
           this.handle2_z = 2;
-          this.moveX2 = this.setMoveValue(this.moveX2, e, this.handle2_pos.x);
-          console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2 + "▲ value2 = " + this.value2);
-          this.handle2_setPosition();
+          // this.moveX2 = this.setMoveValue(this.moveX2, e, this.handle2_pos.x);
+          // console.log('▲ moveX1 = ' + this.moveX1 + ", △ moveX2 = " + this.moveX2 + "▲ value2 = " + this.value2);
+          // this.handle2_setPosition();
+          this.handle2_setPosition(e, this.handle2_pos.x);
 
-          console.log('△ rateValue2 = ' + this.rateValue2 + ', △ stepValue2 = ' + this.stepValue2);
+          console.log('△ rateValue2 = ' + this.rateValue2 + ', △ stepValue2 = ' + this.stepValue2 + ', ▲ value2 = ' + this.value2 + ', ▲ moveX1 = ' + this.moveX1 + ",△ moveX2 = " + this.moveX2);
         }
-        //---- アクティブバーの設定
-        if(this.settings.type !="range"){
-          this.barW = this.x1;
-        }
+        // //---- アクティブバーの設定
+        // if(this.settings.type !="range"){
+        //   this.barW = this.x1;
+        // }
       }
     },
     touchend(){
       this.isMouseDown = false;
       console.log('END | moveX1 = ' + this.moveX1 + ", moveX2 = " + this.moveX2 );
     },
-    setMoveValue( _val, e, posX ){
-      _val = Math.round(e.clientX - posX );
-      if( _val > this.limitX){
-        _val = this.limitX;
+    // setMoveValue( _val, e, posX ){
+    //   _val = Math.round(e.clientX - posX );
+    //   if( _val > this.limitX){
+    //     _val = this.limitX;
+    //   }
+    //   if(_val < 0){
+    //     _val = 0;
+    //   }
+    //   return _val;
+    // },
+    handle1_setPosition(e, posX){
+      if( e != void 0 ){
+        this.moveX1 = Math.round(e.clientX - posX );
       }
-      if(_val < 0){
-        _val = 0;
-      }
-      return _val;
-    },
-    handle1_setPosition(){
+      // this.t1 = 0;
       if( this.moveX1 < 0){
+        this.moveX1 = 0;
         this.x1 = 0
         this.rateValue1 = 0;
-      } else if( this.moveX1 > (this.moveX2 - this.handleW) ){
-        this.moveX1 = this.moveX2 - this.handleW;
-        this.x1 = this.moveX2 - this.handleW;
-      } else if( this.moveX1 > (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ){
-        this.x1 = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
-      } else {
+      } else if( this.moveX1 > (this.moveX2 ) ){
+        this.moveX1 = this.moveX2;
+        this.x1 = this.moveX1;
+      // } else if( this.moveX1 > (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ){
+      //   this.x1 = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
+      //   this.moveX1 = this.$sliderbar_inner.clientWidth;
+      //   console.log('cccc');
+      }else {
         this.x1 = this.moveX1;
       }
-      this.value1 = Math.floor(this.moveX1 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ) ) + this.settings.min_value );
+      // this.value1 = Math.floor(this.moveX1 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ) ) + this.settings.min_value );
 
+      //--- min_value〜max_valueの範囲に対してのvalueを取得
+      this.value1 = this.getValue(this.moveX1);
       //--- %の取得
       // this.rateValue1 = Math.round( this.moveX1 * ( this.settings.rate / this.limitX) );
       this.rateValue1 =  this.getRateValue(this.moveX1);
 
-      //--- range時のバーの設定
-      if(this.settings.type=="range"){
-        this.min_barW = this.moveX1;
-      }
+      //---- アクティブバーの設定
+      // if(this.settings.type !="range"){
+      //   this.barW = this.x1;
+      // }
 
       //---- step時の処理
-      this.setStepHandlePos(this.moveX1, this.$handle1_wrap, this.stepValue1);
+      this.setStepHandlePos(this.moveX1, this.$handle1_wrap);
       // if(this.step != 0){
       //   console.log('stepあり');
       //   for (let index = 0; index < this.stepPos_list.length; index++) {
@@ -271,32 +315,55 @@ export default {
       //     this.min_barW = this.x1;
       //   }
       // }
+
+      //--- アクティブバー、range時のバーの設定
+      if(this.settings.type=="range"){
+        // this.min_barW = this.moveX1;
+        this.min_barW = this.x1;
+      } else {
+        //---- アクティブバーの設定
+        this.barW = this.x1;
+      }
+
+
     },
-    handle2_setPosition(){
-      if( this.moveX2 < 0){
-        this.x2 = 0
-        this.rateValue2 = 0;
-      } else if( this.moveX2 < (this.moveX1 + this.handleW) ){
-        this.moveX2 = this.moveX1 + this.handleW;
-        this.x2 = this.moveX1 + this.handleW;
+    handle2_setPosition(e, posX){
+
+      if( e != void 0 ){
+        this.moveX2 = Math.round(e.clientX - posX );
+      }
+
+      // if( this.moveX2 < 0){
+        // this.x2 = 0
+        // this.moveX2 = 0;
+        // this.rateValue2 = 0;
+        // console.log('ccccc');
+      // } else if( this.moveX2 < (this.moveX1 + this.handleW) ){
+      // } else if( this.moveX2 < (this.moveX1) ){
+      if( this.moveX2 < (this.moveX1) ){
+        // this.moveX2 = this.moveX1 + this.handleW;
+        // this.x2 = this.moveX1 + this.handleW;
+        this.moveX2 = this.moveX1;
+        this.x2 = this.moveX2;
       } else if( this.moveX2 > (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth) ){
+        // this.x2 = this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth;
+        this.moveX2 = this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth;
         this.x2 = this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth;
       } else {
         this.x2 = this.moveX2;
       }
+      // this.value2 = Math.floor(this.moveX2 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth) ) ) + this.settings.min_value );
 
-      this.value2 = Math.floor(this.moveX2 *  ( ( (this.settings.max_value - this.settings.min_value) / (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth) ) ) + this.settings.min_value );
+      //--- min_value〜max_valueの範囲に対してのvalueを取得
+      this.value2 = this.getValue(this.moveX2);
+
       //--- %の取得
       // this.rateValue2 = Math.round( this.moveX2 * ( this.settings.rate / this.limitX) );
       this.rateValue2 =  this.getRateValue(this.moveX2);
 
-      //--- range時のバーの設定
-      if(this.settings.type=="range"){
-        this.max_barW = this.moveX2;
-      }
-
       //---- step時の処理
-      this.setStepHandlePos(this.moveX2, this.$handle2_wrap, this.stepValue2);
+      this.setStepHandlePos(this.moveX2, this.$handle2_wrap);
+
       // if(this.step != 0){
       //   console.log('stepあり');
       //   for (let index = 0; index < this.stepPos_list.length; index++) {
@@ -319,38 +386,51 @@ export default {
       //     this.max_barW = this.x2;
       //   }
       // }
+      //--- range時のバーの設定
+      if(this.settings.type=="range"){
+        // this.min_barW = this.moveX1;
+        this.max_barW = this.x2;
+      }
     },
     setStepHandlePos(_moveVal, _handle){
       //---- step時の処理
       if(this.step != 0){
-        console.log('stepあり = ' + _moveVal);
+        console.log('stepあり = ' + _moveVal + ", __handle = " + _handle);
         for (let index = 0; index < this.stepPos_list.length; index++) {
           if( _moveVal < this.stepPos_list[index] ){
             if( _moveVal < ( this.stepPos_list[index - 1] + this.stepPos_list[index] ) / 2 ){
               if( this.handleType == 0){
                 this.x1 = this.stepPos_list[index - 1];
                 this.stepValue1 = this.stepValue_list[index - 1];
-                this.rateValue1 =  this.getRateValue(this.x1 + (this.$handle1_wrap.clientWidth / 2) );
+                // this.rateValue1 =  this.getRateValue(this.x1 + (this.$handle1_wrap.clientWidth / 2) );
+                this.rateValue1 =  this.getRateValue(this.x1);
+                this.value1 = this.stepValue1;
               } else {
                 this.x2 = this.stepPos_list[index - 1];
                 this.stepValue2 = this.stepValue_list[index - 1];
-                this.rateValue2 =  this.getRateValue(this.x2 + (this.$handle2_wrap.clientWidth / 2));
+                // this.rateValue2 =  this.getRateValue(this.x2 + (this.$handle2_wrap.clientWidth / 2));
+                this.rateValue2 =  this.getRateValue(this.x2 );
+                this.value2 = this.stepValue2;
               }
             } else {
               if( this.handleType == 0){
                 this.x1 = this.stepPos_list[index];
                 this.stepValue1 = this.stepValue_list[ index ];
-                this.rateValue1 =  this.getRateValue(this.x1 + (this.$handle1_wrap.clientWidth / 2));
+                // this.rateValue1 =  this.getRateValue(this.x1 + (this.$handle1_wrap.clientWidth / 2));
+                this.rateValue1 =  this.getRateValue(this.x1);
                 if( this.x1 > (this.$sliderbar_inner.clientWidth - _handle.clientWidth) ){
                   this.x1 = this.$sliderbar_inner.clientWidth - _handle.clientWidth;
                 }
+                this.value1 = this.stepValue1;
               } else {
                 this.x2 = this.stepPos_list[index];
                 this.stepValue2 = this.stepValue_list[ index ];
-                this.rateValue2 =  this.getRateValue(this.x2 + (this.$handle2_wrap.clientWidth / 2));
+                // this.rateValue2 =  this.getRateValue(this.x2 + (this.$handle2_wrap.clientWidth / 2));
+                this.rateValue2 =  this.getRateValue(this.x2 );
                 if( this.x2 > (this.$sliderbar_inner.clientWidth - _handle.clientWidth) ){
                   this.x2 = this.$sliderbar_inner.clientWidth - _handle.clientWidth;
                 }
+                this.value2 = this.stepValue2;
               }
             }
             break;
@@ -366,10 +446,50 @@ export default {
         }
       }
     },
+
+    getValue( _moveX){
+      return  Math.round(_moveX * ( this.settings.max_value / (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ));
+    },
+
     getRateValue( _moveX){
-      // console.log('rate X = ' + _moveX + ", rate = " + this.settings.rate + ", limitX = " + this.limitX);
+      console.log('rate X = ' + _moveX + ", rate = " + this.settings.rate + ", limitX = " + this.limitX);
       // return Math.round( _moveX * ( this.settings.rate / this.limitX) );
-      return Math.round( _moveX * ( this.settings.rate / (this.limitX + this.$handle1_wrap.clientWidth ) ) );
+      // return Math.round( _moveX * ( this.settings.rate / (this.limitX + this.$handle1_wrap.clientWidth ) ) );
+      // return Math.round( _moveX * ( this.settings.rate / (this.limitX + this.$handle1_wrap.clientWidth - this.$handle1_wrap.clientWidth ) ) );
+      return Math.round( _moveX * ( this.settings.rate / (this.limitX) ) );
+    },
+
+    //---- InitValueが設定されていて、tick_ValueListが設定されている場合、マッチするValueを取得
+    setInitStepValue( _type, _initVal ){
+      for (let index = 0; index < this.stepValue_list.length; index++){
+         if( _initVal == this.stepValue_list[ index ] ){
+            if(_type == 1){
+              this.moveX1 = this.stepPos_list[index];
+            } else {
+              this.moveX2 = this.stepPos_list[index];
+            }
+           break;
+         }
+      }
+    },
+
+    //---- InitValueが設定されている場合のValueを取得
+    setInitValue( _type, _initVal){
+      if( _type == 1){
+        this.moveX1 = _initVal * (this.$sliderbar_inner.clientWidth / this.settings.max_value);
+        if(this.moveX1 >= (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) ){
+          //---- ハンドルのz-index設定
+          this.handle1_z = 2;
+          this.handle2_z = 1;
+        }
+      } else {
+        this.moveX2 = _initVal * (this.$sliderbar_inner.clientWidth / this.settings.max_value);
+        if(this.moveX2 <= (0) ){
+          //---- ハンドルのz-index設定
+          this.handle1_z = 1;
+          this.handle2_z = 2;
+        }
+      }
     }
   }
 }

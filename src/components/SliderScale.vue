@@ -39,7 +39,7 @@ export default {
       //  console.log("--" + key, this.$refs[key]);
        if(key != "sliderscale_wrap"){
          cnt +=1;
-         this.$refs[key][0].style.left = Math.floor( this.$sliderscale_wrap.clientWidth / (this.step + 1) ) * cnt + "px";
+         this.$refs[key][0].style.left = Math.floor( (this.$sliderscale_wrap.clientWidth - 10) / (this.step + 1) ) * cnt + (parseInt(this.barW) / 2 ) + "px";
        }
     }
   }
