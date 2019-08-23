@@ -1,6 +1,6 @@
 <template>
   <div class="sliderbar_wrap">
-    <div ref="sliderbar_inner" class="sliderbar_inner">
+    <div ref="sliderbar_inner" class="sliderbar_inner" :style="gageArea_styles">
       <div ref="activebar" class="activebar" :style="activebar_styles"></div>
       <div ref="range_min_bar" class="range_min_bar range_deactivebar" :style="bar1_styles"></div>
       <div ref="range_max_bar" class="range_max_bar range_deactivebar" :class="{off : settings.type!= 'range' }" :style="bar2_styles"></div>
@@ -14,7 +14,7 @@
         <div class="gage"></div>
       </div>
     </div>
-    <SliderScale :color="this.settings.scale_C" :wrap_top="this.settings.scale_BaseTop" :scale_top="this.settings.scale_Top" :step="this.settings.scale_Step" :barW="this.settings.bar_W"/>
+    <SliderScale :color="this.settings.scale_C" :wrap_top="this.settings.scale_BaseTop" :scale_top="this.settings.scale_Top" :step="this.settings.scale_Step" :barW="this.settings.handle_W"/>
   </div>
 </template>
 
@@ -77,24 +77,35 @@ export default {
       let range = (this.settings.type == "range") ? true : false;
       return range
     },
+    gageArea_styles(){
+      return{
+        '--gageArea_h' : this.settings.gageArea_H,
+        '--gageArea_r' : this.settings.gageArea_R,
+      }
+    },
     activebar_styles(){
       return{
         width:this.barW +'px',
-        '--bar_h' : this.settings.bar_H
+        '--bar_h' : this.settings.bar_H,
+        '--gageArea_r' : this.settings.gageArea_R,
       }
     },
     handle1_styles(){
       return{
         left:this.x1 + 'px',
         zIndex : this.handle1_z,
-        '--bar_w' : this.settings.bar_W
+        '--handle_w' : this.settings.handle_W,
+        '--handle_h' : this.settings.handle_H,
+        '--handle_r' : this.settings.handle_R
       }
     },
     handle2_styles(){
       return{
         left:this.x2 + 'px',
         zIndex : this.handle2_z,
-        '--bar_w' : this.settings.bar_W
+        '--handle_w' : this.settings.handle_W,
+        '--handle_h' : this.settings.handle_H,
+        '--handle_r' : this.settings.handle_R
       }
     },
     bar1_styles(){
@@ -103,7 +114,7 @@ export default {
         '--activebar_c' : this.settings.activebar_C,
         '--deactivebar_c' : this.settings.deactivebar_C,
         '--bar_h' : this.settings.bar_H,
-        '--gageArea_c' : this.settings.gageArea_C
+        '--gageArea_c' : this.settings.gageArea_C,
       }
     },
     bar2_styles(){
@@ -165,7 +176,7 @@ export default {
       // if( index != 0 && index != (this.step + 1) ) {
         // this.stepPos_list.push( ( ( (this.$sliderbar_inner.clientWidth - 10 ) / (this.step + 1) ) * index ) );
       // } else {
-        this.stepPos_list.push( ( (this.$sliderbar_inner.clientWidth - 10 ) / (this.step + 1) ) * index );
+        this.stepPos_list.push( ( (this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth) / (this.step + 1) ) * index );
       // }
     }
 
@@ -198,7 +209,7 @@ export default {
     console.log(this.stepValue_list);
     console.log(this.stepPos_list);
     console.log('move2 = ' + this.moveX2);
-    
+
   },
 
   methods:{
@@ -501,8 +512,12 @@ export default {
   --activebar_c : #05d0ff;
   --deactivebar_c : #CCC;
   --bar_h : 20px;
-  --bar_w : 10px;
+  --handle_w : 10px;
+  --handle_h : 20px;
+  --handle_r : 10px;
   --gageArea_c : #000;
+  --gageArea_r : 5px;
+  --gageArea_h : 20px;
   position: relative;
 }
 .sliderbar_inner{
@@ -516,12 +531,15 @@ export default {
   transform: translate(0, -50%);
   width: 100%;
   height: var(--bar_h);
+  border-radius: var(--gageArea_r);
   background-color: var(--activebar_c);
 
 }
 .gageArea{
+  // height: 20px;
   width: 100%;
-  height: 20px;
+  height: var(--gageArea_h);
+  border-radius: var(--gageArea_r);
   background-color: var(--gageArea_c);
 }
 
@@ -548,12 +566,14 @@ export default {
 
 .handle1_wrap{
   position: absolute;
-  top: 0;
+  top: 50%;
+  transform: translate(0, -50%);
 }
 
 .handle2_wrap{
   position: absolute;
-  top: 0;
+  top: 50%;
+  transform: translate(0, -50%);
   opacity: 0;
   pointer-events: none;
   &.on{
@@ -565,6 +585,8 @@ export default {
 .handle{
   cursor: pointer;
   pointer-events: none;
-  width: var(--bar_w);
+  width: var(--handle_w);
+  height: var(--handle_h);
+  border-radius: var(--handle_r);
 }
 </style>

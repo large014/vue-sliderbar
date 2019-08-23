@@ -26,7 +26,8 @@ export default {
         '--wrap_top' : this.wrap_top,
         '--scale_top' : this.scale_top,
         '--first_p' : (parseInt(this.barW) / 2 ) + "px",
-        '--last_p' : (parseInt(this.barW) / 2 ) + "px"
+        '--last_p' : (parseInt(this.barW) / 2 ) + "px",
+        '--barW' : this.barW
       }
     }
   },
@@ -39,7 +40,8 @@ export default {
       //  console.log("--" + key, this.$refs[key]);
        if(key != "sliderscale_wrap"){
          cnt +=1;
-         this.$refs[key][0].style.left = Math.floor( (this.$sliderscale_wrap.clientWidth - 10) / (this.step + 1) ) * cnt + (parseInt(this.barW) / 2 ) + "px";
+        //  this.$refs[key][0].style.left = Math.floor( (this.$sliderscale_wrap.clientWidth) / (this.step + 1) ) * cnt + (parseInt(this.barW) / 2 ) + "px";
+         this.$refs[key][0].style.left = Math.floor( (this.$sliderscale_wrap.clientWidth) / (this.step + 1) ) * cnt +  "px";
        }
     }
   }
@@ -54,11 +56,13 @@ export default {
   --scale_top : "10px";
   --first_p : "20px";
   --last_p  : "100px";
+  --barW : "5px";
 
   position: absolute;
-  width: 100%;
+  width: calc(100% - var(--barW));
   height: 2px;
   top: var(--wrap_top);
+  left: calc(var(--barW) / 2);
   background-color: var(--scale_c);
 
   .scalebar{
@@ -70,12 +74,12 @@ export default {
     top: var(--scale_top);
 
     &.start{
-      // left :0;
-      left:var(--first_p)
+      left :0;
+      // left:var(--first_p)
     }
     &.end{
-      // right: -1px;
-      right: var(--last_p);
+      right: -1px;
+      // right: var(--last_p);
     }
   }
 }

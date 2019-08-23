@@ -28,16 +28,21 @@ export default {
         activebar_C : "#07cdAA",
         deactivebar_C : "#CCC",
         gageArea_C : "#CCC",
+        gageArea_H : "30px",
+        gageArea_R : "30px",
         bar_H : "12px",
-        bar_W : "10px",
+        bar_R : "3px",
+        handle_W : "20px",
+        handle_H : "20px",
+        handle_R : "40px",
         min_value : 0,
         max_value : 500,
-        // init_value1 : 200,
+        init_value1 : 200,
         // init_value2 : "金",
         rate: 100,
         // tick_ValueList:[0, 100, 200, 300, 400, 500],
         // tick_ValueList:["月","火","水","木","金","土","日"],
-        scale_Step : 3,
+        scale_Step : 4,
         scale_C : "#F00",
         scale_BaseTop : "-10px",
         scale_Top : "-10px",
@@ -59,9 +64,6 @@ export default {
 #app{
   text-align: center;
 }
-.sliderbarArea{
-  margin-top: 100px;
-}
 
 .sliderbar{
   width:300px;
@@ -69,8 +71,6 @@ export default {
 }
 .handle{
   border: none;
-  border-radius: 3px;
-  height: 20px;
 }
 .handle1{
   background: #3f51b5;
@@ -79,6 +79,10 @@ export default {
   background: #ff51b5;
 }
 
+//---- Debug
+.sliderbarArea{
+  margin-top: 100px;
+}
 button{
   cursor: pointer;
   border: 1px solid #000;
