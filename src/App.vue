@@ -3,6 +3,7 @@
     <div class="sliderbarArea">
       <Sliderbar ref="sliderbar" class="sliderbar" :settings="settings">
         <div slot="handle1" class="handle handle1">
+          <!-- <img src="./assets/handle.png" alt=""> -->
         </div>
         <div slot="handle2" class="handle handle2">
         </div>
@@ -24,7 +25,8 @@ export default {
   data(){
     return{
       settings:{
-        type : 'range',
+        type : 'normal',
+        width : '300px',
         activebar_C : "#07cdAA",
         deactivebar_C : "#CCC",
         gageArea_C : "#CCC",
@@ -32,17 +34,21 @@ export default {
         gageArea_R : "30px",
         bar_H : "12px",
         bar_R : "3px",
-        handle_W : "20px",
-        handle_H : "20px",
-        handle_R : "40px",
-        min_value : 0,
-        max_value : 500,
-        init_value1 : 200,
+        // handle_W : "20px",
+        // handle_H : "20px",
+        handle_R : "15px",
+        handle_min_C : "#3f51b5",
+        handle_max_C : "#ff51b5",
+        min_value : 500,
+        max_value : 0,
+        // init_value1 : 200,
+        init_value1 : "水",
         // init_value2 : "金",
         rate: 100,
         // tick_ValueList:[0, 100, 200, 300, 400, 500],
         // tick_ValueList:["月","火","水","木","金","土","日"],
-        scale_Step : 4,
+        // isscale : true,
+        // scale_Step : 3,
         scale_C : "#F00",
         scale_BaseTop : "-10px",
         scale_Top : "-10px",
@@ -65,21 +71,10 @@ export default {
   text-align: center;
 }
 
+//---- Debug
 .sliderbar{
-  width:300px;
   margin: 0 auto;
 }
-.handle{
-  border: none;
-}
-.handle1{
-  background: #3f51b5;
-}
-.handle2{
-  background: #ff51b5;
-}
-
-//---- Debug
 .sliderbarArea{
   margin-top: 100px;
 }

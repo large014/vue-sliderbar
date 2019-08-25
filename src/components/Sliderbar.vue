@@ -1,5 +1,5 @@
 <template>
-  <div class="sliderbar_wrap">
+  <div class="sliderbar_wrap" :style="wrap_styles">
     <div ref="sliderbar_inner" class="sliderbar_inner" :style="gageArea_styles">
       <div ref="activebar" class="activebar" :style="activebar_styles"></div>
       <div ref="range_min_bar" class="range_min_bar range_deactivebar" :style="bar1_styles"></div>
@@ -14,7 +14,7 @@
         <div class="gage"></div>
       </div>
     </div>
-    <SliderScale :color="this.settings.scale_C" :wrap_top="this.settings.scale_BaseTop" :scale_top="this.settings.scale_Top" :step="this.settings.scale_Step" :barW="this.settings.handle_W"/>
+    <SliderScale v-if="this.settings.isscale" :color="this.settings.scale_C" :wrap_top="this.settings.scale_BaseTop" :scale_top="this.settings.scale_Top" :step="getStepNum" :barW="getHandleW"/>
   </div>
 </template>
 
@@ -59,8 +59,8 @@ export default {
       handle1_z : 1,
       handle2_z : 1,
       step : 0,
-      t1 : 0,
-      t2 : 0
+      min_tempX : 0,
+      max_tempX : 1
     }
   },
   computed:{
@@ -73,9 +73,36 @@ export default {
     $sliderbar_inner(){
       return this.$refs.sliderbar_inner;
     },
+    getStepNum(){
+      let stepNum = 0;
+      if( this.settings.tick_ValueList === void 0 ){
+        if( this.settings.scale_Step != void 0){
+          stepNum = this.settings.scale_Step;
+        }
+      } else {
+        stepNum = this.settings.tick_ValueList.length - 2;
+      }
+      return stepNum
+    },
+    getHandleW(){
+      let hw = 0;
+      if( this.settings.handle_W === void 0){
+        hw = "10px";
+        // console.log('case1');
+      } else {
+        hw = this.settings.handle_W;
+        // console.log('case2');
+      }
+      return hw
+    },
     getHandleType(){
       let range = (this.settings.type == "range") ? true : false;
       return range
+    },
+    wrap_styles(){
+      return{
+        'width' :this.settings.width
+      }
     },
     gageArea_styles(){
       return{
@@ -85,9 +112,8 @@ export default {
     },
     activebar_styles(){
       return{
-        width:this.barW +'px',
+        width:this.barW + 0 +'px',
         '--bar_h' : this.settings.bar_H,
-        '--gageArea_r' : this.settings.gageArea_R,
       }
     },
     handle1_styles(){
@@ -96,7 +122,8 @@ export default {
         zIndex : this.handle1_z,
         '--handle_w' : this.settings.handle_W,
         '--handle_h' : this.settings.handle_H,
-        '--handle_r' : this.settings.handle_R
+        '--handle_r' : this.settings.handle_R,
+        '--handle1_c' : this.settings.handle_min_C
       }
     },
     handle2_styles(){
@@ -105,12 +132,13 @@ export default {
         zIndex : this.handle2_z,
         '--handle_w' : this.settings.handle_W,
         '--handle_h' : this.settings.handle_H,
-        '--handle_r' : this.settings.handle_R
+        '--handle_r' : this.settings.handle_R,
+        '--handle2_c' : this.settings.handle_max_C
       }
     },
     bar1_styles(){
       return{
-        width:this.min_barW +'px',
+        width:this.min_barW + 1 +'px',
         '--activebar_c' : this.settings.activebar_C,
         '--deactivebar_c' : this.settings.deactivebar_C,
         '--bar_h' : this.settings.bar_H,
@@ -119,54 +147,71 @@ export default {
     },
     bar2_styles(){
       return{
-        left:this.max_barW +'px',
+        left:this.max_barW  + this.max_tempX +'px',
         '--bar_h' : this.settings.bar_H
       }
     },
   },
 
   mounted(){
-
     // console.log('min_value = ' + this.settings.min_value);
     // console.log('xx = ' + (this.settings.max_value / this.$sliderbar_inner.clientWidth) );
     // console.log('長さ = ' + this.$sliderbar_inner.clientWidth);
     // console.log('ハンドル = ' + this.$handle1_wrap.clientWidth);
 
-    //--- setteingのエラーチェック
-
-
-    //--- イベント設定
+    //---- イベント設定
     window.addEventListener("mousemove", this.touchmove.bind(this));
     window.addEventListener("mouseup", this.touchend.bind(this));
 
-    //--- 初期値の設定
-
-
+    //---- 初期値の設定
     this.limitX = this.$sliderbar_inner.clientWidth - this.$handle1_wrap.clientWidth;
-
     this.handleW = this.$handle1_wrap.clientWidth;
+
     if(this.settings.type != "range"){
-      this.handleW = 0 //--- handleの幅
+      //---- handleの幅
+      this.handleW = 0
+      //---- アクティブバーにRの設定がある場合は、Leftのみ設定
+      if(this.settings.gageArea_R != void 0){
+        this.$refs.activebar.style.borderTopLeftRadius = this.settings.gageArea_R;
+        this.$refs.activebar.style.borderBottomLeftRadius = this.settings.gageArea_R;
+        this.$refs.activebar.style.marginLeft = "2px";
+      }
     } else {
-      this.barW = this.$sliderbar_inner.clientWidth; //--- アクティブバーの長さの設定
+      //---- アクティブバーの長さの設定
+      this.barW = this.$sliderbar_inner.clientWidth;
+
+      //---- アクティブバーにRの設定がある場合は、Leftのみ設定
+      if(this.settings.gageArea_R != void 0){
+        this.$refs.activebar.style.borderTopLeftRadius = this.settings.gageArea_R;
+        this.$refs.activebar.style.borderBottomLeftRadius = this.settings.gageArea_R;
+      }
+
+      //---- ハンドルにRの設定がある場合は、max_barの移動位置を調整
+      if(this.settings.handle_R != void 0){
+        this.max_tempX = 2
+      }
+
+      //---- Max値の初期値の設定
+      if( this.settings.init_value2 != void 0 ){
+          this.handleType = 1;
+          this.setInitStepValue( 2, this.settings.init_value2 );
+          this.handle2_setPosition();
+      }
     }
-    //--- rangeタイプの場合のmaxバーの設定
+    //---- rangeタイプの場合のmaxバーの設定
     this.x2 = (this.$sliderbar_inner.clientWidth - this.$handle2_wrap.clientWidth);
     this.moveX2 = this.x2;
     this.max_barW = this.moveX2;
 
-
-    //--- scale_Stepとtick_ValueListの整合性
+    //---- scale_Stepとtick_ValueListの整合性
     if( this.settings.tick_ValueList === void 0 ){
-      console.log('ないよー');
       this.step = this.settings.scale_Step;
-      //--- scale_Stepありの場合のValueの設定
+      //---- scale_Stepありの場合のValueの設定
       for (let index = 0; index < (this.step + 2); index++) {
         this.stepValue_list.push( (  ( ( -(this.settings.min_value) + this.settings.max_value ) / (this.step + 1) ) * index ) + this.settings.min_value );
       }
     } else {
-      console.log('あるよー');
-      //--- tick_ValueListありの場合のValue設定
+      //---- tick_ValueListありの場合のValue設定
       this.stepValue_list = this.settings.tick_ValueList;
       this.step = this.settings.tick_ValueList.length - 2;
     }
@@ -194,22 +239,23 @@ export default {
       this.handle2_setPosition();
     }
 
-
-
-    if( this.settings.type === "range" ){
-      if( this.settings.init_value2 != void 0 ){
-          this.handleType = 1;
-          this.setInitStepValue( 2, this.settings.init_value2 );
-          this.handle2_setPosition();
-      }
-    }
-
-
+    // if( this.settings.type === "range" ){
+    //   if( this.settings.init_value2 != void 0 ){
+    //       this.handleType = 1;
+    //       this.setInitStepValue( 2, this.settings.init_value2 );
+    //       this.handle2_setPosition();
+    //   }
+    // }
 
     console.log(this.stepValue_list);
     console.log(this.stepPos_list);
     console.log('move2 = ' + this.moveX2);
+  },
 
+  destroyed(){
+    //--- イベント削除
+    window.removeEventListener("mousemove", this.touchmove.bind(this));
+    window.removeEventListener("mouseup", this.touchend.bind(this));
   },
 
   methods:{
@@ -274,7 +320,6 @@ export default {
       if( e != void 0 ){
         this.moveX1 = Math.round(e.clientX - posX );
       }
-      // this.t1 = 0;
       if( this.moveX1 < 0){
         this.moveX1 = 0;
         this.x1 = 0
@@ -514,9 +559,11 @@ export default {
   --bar_h : 20px;
   --handle_w : 10px;
   --handle_h : 20px;
-  --handle_r : 10px;
+  --handle_r : 0px;
+  --handle1_c: rgba(0,0,0,1);
+  --handle2_c: "#CCC";
   --gageArea_c : #000;
-  --gageArea_r : 5px;
+  --gageArea_r : 0px;
   --gageArea_h : 20px;
   position: relative;
 }
@@ -531,9 +578,8 @@ export default {
   transform: translate(0, -50%);
   width: 100%;
   height: var(--bar_h);
-  border-radius: var(--gageArea_r);
+  // border-radius: var(--gageArea_r);
   background-color: var(--activebar_c);
-
 }
 .gageArea{
   // height: 20px;
@@ -568,6 +614,10 @@ export default {
   position: absolute;
   top: 50%;
   transform: translate(0, -50%);
+
+//  .handle1{
+//     background-color: var(--handle1_c);
+//   }
 }
 
 .handle2_wrap{
@@ -585,8 +635,19 @@ export default {
 .handle{
   cursor: pointer;
   pointer-events: none;
+  img{
+    user-select: none;
+  }
   width: var(--handle_w);
   height: var(--handle_h);
   border-radius: var(--handle_r);
+  &.handle1{
+    background-color: var(--handle1_c);
+  }
+  &.handle2{
+    background-color: var(--handle2_c);
+  }
 }
+
+
 </style>
