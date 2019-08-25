@@ -2,7 +2,7 @@
   <div class="sliderbar_wrap" :style="wrap_styles">
     <div ref="sliderbar_inner" class="sliderbar_inner" :style="gageArea_styles">
       <div ref="activebar" class="activebar" :style="activebar_styles"></div>
-      <div ref="range_min_bar" class="range_min_bar range_deactivebar" :style="bar1_styles"></div>
+      <div ref="range_min_bar" class="range_min_bar range_deactivebar" v-if="settings.type =='range'" :style="bar1_styles"></div>
       <div ref="range_max_bar" class="range_max_bar range_deactivebar" :class="{off : settings.type!= 'range' }" :style="bar2_styles"></div>
       <div ref="handle1_wrap" class="handle1_wrap" @mousedown="touchstart" @mouseup="touchend" :style="handle1_styles" data_id="handle1_wrap">
         <slot name="handle1"></slot>
@@ -60,7 +60,7 @@ export default {
       handle2_z : 1,
       step : 0,
       min_tempX : 0,
-      max_tempX : 1
+      max_tempX : 0
     }
   },
   computed:{
@@ -108,11 +108,12 @@ export default {
       return{
         '--gageArea_h' : this.settings.gageArea_H,
         '--gageArea_r' : this.settings.gageArea_R,
+        '--gageArea_c' : this.settings.gageArea_C,
       }
     },
     activebar_styles(){
       return{
-        width:this.barW + 0 +'px',
+        width:this.barW + this.min_tempX +'px',
         '--bar_h' : this.settings.bar_H,
       }
     },
@@ -138,11 +139,11 @@ export default {
     },
     bar1_styles(){
       return{
-        width:this.min_barW + 1 +'px',
+        width:this.min_barW + this.min_tempX +'px',
         '--activebar_c' : this.settings.activebar_C,
         '--deactivebar_c' : this.settings.deactivebar_C,
         '--bar_h' : this.settings.bar_H,
-        '--gageArea_c' : this.settings.gageArea_C,
+        // '--gageArea_c' : this.settings.gageArea_C,
       }
     },
     bar2_styles(){
@@ -170,25 +171,19 @@ export default {
     if(this.settings.type != "range"){
       //---- handleの幅
       this.handleW = 0
-      //---- アクティブバーにRの設定がある場合は、Leftのみ設定
-      if(this.settings.gageArea_R != void 0){
-        this.$refs.activebar.style.borderTopLeftRadius = this.settings.gageArea_R;
-        this.$refs.activebar.style.borderBottomLeftRadius = this.settings.gageArea_R;
-        this.$refs.activebar.style.marginLeft = "2px";
+      if(this.settings.handle_R != void 0){
+        this.min_tempX = (this.$handle1_wrap.clientWidth/2);
       }
     } else {
       //---- アクティブバーの長さの設定
       this.barW = this.$sliderbar_inner.clientWidth;
 
-      //---- アクティブバーにRの設定がある場合は、Leftのみ設定
-      if(this.settings.gageArea_R != void 0){
-        this.$refs.activebar.style.borderTopLeftRadius = this.settings.gageArea_R;
-        this.$refs.activebar.style.borderBottomLeftRadius = this.settings.gageArea_R;
-      }
-
-      //---- ハンドルにRの設定がある場合は、max_barの移動位置を調整
+      //---- ハンドルにRの設定がある場合は、min_barのR設定、min_bar、max_barの移動位置の調整
       if(this.settings.handle_R != void 0){
-        this.max_tempX = 2
+        this.max_tempX = (this.$handle1_wrap.clientWidth/2);
+        this.min_tempX = this.$handle1_wrap.clientWidth;
+        this.$refs.range_min_bar.style.borderTopRightRadius = this.settings.gageArea_R;
+        this.$refs.range_min_bar.style.borderBottomRightRadius = this.settings.gageArea_R;
       }
 
       //---- Max値の初期値の設定
@@ -247,6 +242,7 @@ export default {
     //   }
     // }
 
+    this.$emit("bar_update")
     console.log(this.stepValue_list);
     console.log(this.stepPos_list);
     console.log('move2 = ' + this.moveX2);
@@ -296,6 +292,8 @@ export default {
 
           console.log('△ rateValue2 = ' + this.rateValue2 + ', △ stepValue2 = ' + this.stepValue2 + ', ▲ value2 = ' + this.value2 + ', ▲ moveX1 = ' + this.moveX1 + ",△ moveX2 = " + this.moveX2);
         }
+
+        this.$emit("bar_update")
         // //---- アクティブバーの設定
         // if(this.settings.type !="range"){
         //   this.barW = this.x1;
@@ -304,6 +302,7 @@ export default {
     },
     touchend(){
       this.isMouseDown = false;
+      this.$emit("bar_update")
       console.log('END | moveX1 = ' + this.moveX1 + ", moveX2 = " + this.moveX2 );
     },
     // setMoveValue( _val, e, posX ){
@@ -560,7 +559,7 @@ export default {
   --handle_w : 10px;
   --handle_h : 20px;
   --handle_r : 0px;
-  --handle1_c: rgba(0,0,0,1);
+  --handle1_c: rgba(0,0,0,0);
   --handle2_c: "#CCC";
   --gageArea_c : #000;
   --gageArea_r : 0px;
@@ -569,8 +568,9 @@ export default {
 }
 .sliderbar_inner{
   position: relative;
-  cursor: pointer;
   overflow: hidden;
+  cursor: pointer;
+  border-radius: var(--gageArea_r);
 }
 .activebar{
   position: absolute;
