@@ -40,7 +40,7 @@ export default {
         type : 'range',
         width : '400px',
         activebar_C : "#07cdAA",
-        deactivebar_C : "#CCC",
+        deactivebar_C : "#F00",
         gageArea_C : "#CCC",
         gageArea_H : "20px",
         gageArea_R : "15px",

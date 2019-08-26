@@ -138,7 +138,6 @@ export default {
     bar1_styles(){
       return{
         width:this.min_barW + this.min_tempX +'px',
-        '--activebar_c' : this.settings.activebar_C,
         '--deactivebar_c' : this.settings.deactivebar_C,
         '--bar_h' : this.settings.bar_H,
       }
@@ -146,6 +145,7 @@ export default {
     bar2_styles(){
       return{
         left:this.max_barW  + this.max_tempX +'px',
+        '--deactivebar_c' : this.settings.deactivebar_C,
         '--bar_h' : this.settings.bar_H
       }
     },
