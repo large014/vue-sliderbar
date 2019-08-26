@@ -32,10 +32,15 @@ export default {
     }
   },
   mounted(){
+    // console.log('scale w = ' + this.$sliderscale_wrap.clientWidth);
+    // console.log(this.$refs);
+    // console.log('refs = ' + this.$refs.length );
     let cnt = 0;
     for (const key in this.$refs) {
+      //  console.log("--" + key, this.$refs[key]);
        if(key != "sliderscale_wrap"){
          cnt +=1;
+        //  this.$refs[key][0].style.left = Math.floor( (this.$sliderscale_wrap.clientWidth) / (this.step + 1) ) * cnt + (parseInt(this.barW) / 2 ) + "px";
          this.$refs[key][0].style.left = Math.floor( (this.$sliderscale_wrap.clientWidth) / (this.step + 1) ) * cnt +  "px";
        }
     }
@@ -64,14 +69,17 @@ export default {
     height: 20px;
     position: absolute;
     width: 2px;
+    // background-color: var(--scale_c);
     border-left: 1px solid var(--scale_c);
     top: var(--scale_top);
 
     &.start{
       left :0;
+      // left:var(--first_p)
     }
     &.end{
       right: -1px;
+      // right: var(--last_p);
     }
   }
 }

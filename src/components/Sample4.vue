@@ -1,5 +1,5 @@
 <template>
-  <div class="sample1_wrappear">
+  <div class="sample4_wrappear">
       <div class="sliderbarArea">
         <p class="text">例4 : 範囲-100 〜 400 Range、ハンドルカスタム設定</p>
         <Sliderbar ref="sliderbar" class="sliderbar" :settings="settings" @bar_update="getValue">
@@ -22,7 +22,7 @@
 import Sliderbar from './slideBar/Sliderbar.vue'
 
 export default {
-  name: 'Sample1',
+  name: 'Sample4',
   props: {
   },
   components:{
@@ -45,7 +45,6 @@ export default {
         gageArea_H : "20px",
         gageArea_R : "15px",
         bar_H : "20px",
-        // bar_R : "3px",
         handle_W : "20px",
         handle_H : "20px",
         handle_R : "15px",
@@ -53,9 +52,6 @@ export default {
         handle_max_C : "#ff51b5",
         min_value : -100,
         max_value : 400,
-        // init_value1 : 200,
-        // init_value1 : "水",
-        // init_value2 : "金",
         rate: 100,
         // tick_ValueList:[0, 100, 200, 300, 400, 500],
         // tick_ValueList:["月","火","水","木","金","土","日"],
@@ -83,6 +79,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .text{
+  font-weight: bold;
   margin-bottom: 40px;
 }
 

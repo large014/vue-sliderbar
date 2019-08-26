@@ -38,24 +38,12 @@ export default {
         deactivebar_C : "#CCC",
         gageArea_C : "#CCC",
         gageArea_H : "20px",
-        // gageArea_R : "30px",
         bar_H : "20px",
-        // bar_R : "3px",
-        // handle_W : "20px",
-        // handle_H : "20px",
-        // handle_R : "15px",
         handle_min_C : "#3f51b5",
         handle_max_C : "#ff51b5",
         min_value : 0,
         max_value : 500,
-        // init_value1 : 200,
-        // init_value1 : "水",
-        // init_value2 : "金",
         rate: 100,
-        // tick_ValueList:[0, 100, 200, 300, 400, 500],
-        // tick_ValueList:["月","火","水","木","金","土","日"],
-        // isscale : true,
-        // scale_Step : 3,
         scale_C : "#F00",
         scale_BaseTop : "-10px",
         scale_Top : "-10px",
@@ -69,14 +57,6 @@ export default {
       this.value1 = this.$refs.sliderbar.value1;
       this.rateValue1 = this.$refs.sliderbar.rateValue1;
     }
-    // getValue1(){
-    //   console.log('value = ' + this.$refs.sliderbar.stepValue1);
-    //   this.value1 = this.$refs.sliderbar.value1;
-    //   this.rateValue1 = this.$refs.sliderbar.rateValue1;
-    // },
-    // getValue2(){
-    //   console.log('value = ' + this.$refs.sliderbar.stepValue2);
-    // }
   }
 }
 </script>
@@ -84,6 +64,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .text{
+  font-weight: bold;
   margin-bottom: 20px;
 }
 
